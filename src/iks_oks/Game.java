@@ -133,7 +133,7 @@ public class Game extends JFrame {
 		if(cntTurn==9){
 			done=true;
 			reset.setEnabled(true);
-			System.out.println("Draw");
+			System.out.println("Draw!");
 		}
 	}
 	
