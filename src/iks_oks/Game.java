@@ -35,6 +35,8 @@ public class Game extends JFrame {
 	private JButton reset=new JButton("reset");
 	private String turn="X";
 	private boolean done=false;
+
+	private int cntTurn=0;
 	
 	public String getTurn() {
 		return turn;
@@ -126,10 +128,20 @@ public class Game extends JFrame {
 		if(matrix[0][2].getType().equals(turn) && matrix[1][1].getType().equals(turn) 
 				&& matrix[2][0].getType().equals(turn) && !done ) {System.out.println(turn+" wins"); done=true; reset.setEnabled(true);}
 	}
+
+	private void checkDraw(){
+		if(cntTurn==9){
+			done=true;
+			reset.setEnabled(true);
+			System.out.println("Draw");
+		}
+	}
 	
 	public void updateM() {
+		cntTurn++;
 		repaint();
 		checkWin();
+		checkDraw();
 		if(turn.equals("X")) turn="O";
 		else turn="X";
 	}
@@ -143,6 +155,7 @@ public class Game extends JFrame {
 		done=false;
 		turn="X";
 		reset.setEnabled(false);
+		cntTurn=0;
 		repaint();
 	}
 	
