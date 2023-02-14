@@ -82,15 +82,19 @@ public class Field extends JPanel {
 	public void setType(String type) {
 		this.type=type;
 	}
+
+	public void updateField(){
+		type=parent.getTurn();
+		parent.updateM(idI,idJ);	
+	}
 	
 	private void addAdapters() {
 		this.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				//System.out.println("pressed");
 				if(parent.getDone()) return;
-				if(type.equals("N")) {
-					type=parent.getTurn();
-					parent.updateM();					
+				if(type.equals("N") && parent.getGo()) {
+					updateField();					
 				
 				}
 			}

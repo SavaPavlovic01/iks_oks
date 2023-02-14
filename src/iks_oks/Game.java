@@ -28,7 +28,7 @@ public class Game extends JFrame {
 	
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
-	private Field[][] matrix=new Field[3][3];
+	public Field[][] matrix=new Field[3][3];
 	
 	//private Field field=new Field();
 	private JPanel center=new JPanel();
@@ -37,22 +37,33 @@ public class Game extends JFrame {
 	private boolean done=false;
 
 	private int cntTurn=0;
+	private boolean go=false;
+	private boolean first=true;
+
+	private Listener listener;
 	
 	public String getTurn() {
 		return turn;
 	}
 	
 	public boolean getDone() {return done;}
+
+	public ObjectInputStream getIn(){return in;}
+
+	public ObjectOutputStream getOut(){return out;}
+
+	public boolean getGo(){return go;}
 	
 	public Game(Socket client,String name) {
 		super();
 		this.client=client;
 		this.name=name;
-		
+		//this.first=first;
+
 		try {
 			this.out=new ObjectOutputStream(client.getOutputStream());
 			this.in=new ObjectInputStream(client.getInputStream());
-			
+			first=(boolean) in.readObject();
 			id=(int) in.readObject();
 			System.out.println(id);
 			System.out.println(name);
@@ -89,6 +100,12 @@ public class Game extends JFrame {
 			reset();
 		});
 		
+		//listener=new Listener(this);
+
+		listener=new Listener(this);
+		listener.start();
+
+		go=first;
 	}
 	
 	public void paint(Graphics g) {
@@ -136,14 +153,46 @@ public class Game extends JFrame {
 			System.out.println("Draw!");
 		}
 	}
+
+	private void getPlay(){
+		try {
+			int i=(int) in.readObject();
+			int j=(int) in.readObject();
+			matrix[i][j].updateField();
+		} catch (ClassNotFoundException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
-	public void updateM() {
+	public void updateM(int i,int j) {
 		cntTurn++;
 		repaint();
 		checkWin();
 		checkDraw();
+		try {
+			
+			if(go){
+				Integer ii=i;
+				Integer jj=j;
+				
+				out.writeObject(ii);
+				//System.out.println("send i");
+				out.writeObject(jj);
+				//System.out.println("sent j");
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if(turn.equals("X")) turn="O";
 		else turn="X";
+
+		//if(go){go=false;}else {go=true;}
+		go=!go;
+
+		
 	}
 	
 	public void reset() {
