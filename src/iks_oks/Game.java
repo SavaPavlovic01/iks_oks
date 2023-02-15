@@ -2,9 +2,12 @@ package iks_oks;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -12,9 +15,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
 import javax.swing.border.Border;
 
 public class Game extends JFrame {
@@ -41,6 +51,11 @@ public class Game extends JFrame {
 	private boolean first=true;
 
 	private Listener listener;
+	public boolean OpWantsReset=false;
+	public boolean wantsReset=false;
+
+	public JTextArea chat=new JTextArea();
+	public JTextField chat1=new JTextField();
 	
 	public String getTurn() {
 		return turn;
@@ -53,6 +68,14 @@ public class Game extends JFrame {
 	public ObjectOutputStream getOut(){return out;}
 
 	public boolean getGo(){return go;}
+
+	public void writeMessage(String message,Color color){
+		Color colorOld=chat.getForeground();
+		if(color==null) color=chat.getForeground();
+		chat.setForeground(color);
+		chat.append(message);
+		chat.setForeground(colorOld);
+	}
 	
 	public Game(Socket client,String name) {
 		super();
@@ -106,6 +129,49 @@ public class Game extends JFrame {
 		listener.start();
 
 		go=first;
+
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		
+
+		JPanel panelEast=new JPanel();
+		panelEast.setLayout(new BoxLayout(panelEast,BoxLayout.PAGE_AXIS));
+
+		chat.setEditable(false);
+		
+		chat.setPreferredSize(new Dimension(20000,20000));
+
+		JScrollPane sp = new JScrollPane(chat,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		sp.setPreferredSize(new Dimension(this.getWidth()/3,this.getHeight()-50));
+		//chat.setSize(this.width/4, this.height);
+		chat1.setPreferredSize(new Dimension(this.getWidth()/3,20));
+		panelEast.add(sp);
+		panelEast.add(chat1);
+
+		this.add(panelEast,BorderLayout.EAST);
+
+		chat1.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				String message=name+':'+chat1.getText()+'\n';
+				
+				chat.append(name+':'+chat1.getText()+'\n');
+				chat1.setText("");
+				try {
+					out.writeObject(13);
+					System.out.println(message);
+					out.writeObject(message);
+					out.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}});
+
+			
 	}
 	
 	public void paint(Graphics g) {
@@ -175,7 +241,7 @@ public class Game extends JFrame {
 			if(go){
 				Integer ii=i;
 				Integer jj=j;
-				
+				out.writeObject(10);
 				out.writeObject(ii);
 				//System.out.println("send i");
 				out.writeObject(jj);
@@ -196,16 +262,40 @@ public class Game extends JFrame {
 	}
 	
 	public void reset() {
-		for(int i=0;i<3;i++) {
-			for(int j=0;j<3;j++) {
-				matrix[i][j].setType("N");
+		if(!wantsReset && OpWantsReset){
+			try {
+				out.writeObject(12);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
-		done=false;
-		turn="X";
+		wantsReset=true;
 		reset.setEnabled(false);
-		cntTurn=0;
-		repaint();
+		if(OpWantsReset){
+			for(int i=0;i<3;i++) {
+				for(int j=0;j<3;j++) {
+					matrix[i][j].setType("N");
+				}
+			}
+			done=false;
+			wantsReset=false;
+			OpWantsReset=false;
+			turn="X";
+			reset.setEnabled(false);
+			cntTurn=0;
+			repaint();
+			
+		}else{
+			try {
+				out.writeObject(11);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
 	}
 	
 	

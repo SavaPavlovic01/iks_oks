@@ -1,5 +1,6 @@
 package iks_oks;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -20,14 +21,37 @@ public class Listener extends Thread {
             try {
                 Integer arg=(Integer)game.getIn().readObject();
                 System.out.println(arg);
+                if(arg==10){
+                    int i= (Integer)game.getIn().readObject();
+                    int j= (Integer)game.getIn().readObject();  
+                    game.matrix[i][j].updateField(); 
+                }
+                if(arg==11){
+                    game.OpWantsReset=true;
+                    System.out.println("Op wants reset");
+                    game.writeMessage("Opponent wants reset\n", Color.red);
+                    
+                    if(game.wantsReset)game.reset();
+                }
+                if(arg==12){
+                    game.OpWantsReset=true;
+                    game.reset();
+                }
+                if(arg==13){
+                    String message=game.getIn().readObject().toString();
+                    game.writeMessage(message, null);
+    
+                }
+
+                /*
                 list.add(arg);
                 if(list.size()==2){
                     int i=this.getItem();
                     int j=this.getItem();
                     
-                    game.matrix[i][j].updateField();
+                   
                     
-                }
+                } */
             } catch (ClassNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

@@ -1,6 +1,7 @@
 package iks_oks;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.Label;
@@ -34,10 +35,12 @@ public class GameMenu extends JFrame{
 		this.setTitle("Iks oks");
 		this.setSize(width, height);
 		
+		
 		panelCenter.setLayout(new BoxLayout(panelCenter,BoxLayout.PAGE_AXIS));
 		panelCenter.add(new Label("User name:"));
 		
 		tf.setSize(200, 50);
+		tf.setPreferredSize(new Dimension(200,50));
 		panelCenter.add(tf);
 		
 		saveUser=new JButton("Save username");
@@ -50,6 +53,7 @@ public class GameMenu extends JFrame{
 		
 		connect=new JButton("Connect");
 		connect.addActionListener((ae)->{
+			name=tf.getText();
 			connectToServer();
 			new Game(client,name);
 			this.dispose();
@@ -58,6 +62,7 @@ public class GameMenu extends JFrame{
 		panelCenter.add(connect);
 		
 		this.add(panelCenter,BorderLayout.CENTER);
+		
 		
 	}
 	
